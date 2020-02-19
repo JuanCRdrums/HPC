@@ -1,6 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-#define n 5
+#define n 100
+
+void genMatrix(int mat[n][n])
+{
+  for(int i = 0; i < n; i++)
+  {
+    for(int j = 0; j < n; j++)
+      mat[i][j] = rand() % n+1;
+  }
+}
 
 void printMat(int mul[n][n])
 {
@@ -28,22 +39,21 @@ void multmat(int fst[n][n],int sec[n][n],int mul[n][n])
 
 int main(int argc, char const *argv[])
 {
-    int fst[n][n] = {{1,2,3,4,5},
-                    {11,12,13,14,15},
-                    {21,22,23,24,25},
-                    {31,32,33,34,35},
-                    {41,42,43,44,45}};
+    int *fst = (int *)malloc(n * n * sizeof(int));
+    genMatrix(fst);
     
-    int sec[n][n] = {{1,2,3,4,5},
-                    {6,7,8,9,10},
-                    {11,12,13,14,15},
-                    {16,17,18,19,20},
-                    {21,22,23,24,25},};
+    int *sec = (int *)malloc(n * n * sizeof(int));
+    genMatrix(sec);
 
-    int mult[n][n];
-
+    int *mult = (int *)malloc(n * n * sizeof(int));
+    clock_t start,end;
+    start = clock();
     multmat(fst,sec,mult);
-    printMat(mult);
-    
+    end = clock();
+    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time used: %f \n",cpu_time_used);
+    /*printMat(fst);
+    printMat(sec);
+    printMat(mult);*/
     return 0;
 }
