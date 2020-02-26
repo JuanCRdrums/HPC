@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define n 100
+#define n 2000
 
 void genMatrix(int mat[n][n])
 {
@@ -51,6 +51,7 @@ int main(int argc, char const *argv[])
     multmat(fst,sec,mult);
     end = clock();
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("N value = %d \n\n",n);
     printf("Time used: %f \n",cpu_time_used);
     /*printMat(fst);
     printMat(sec);
