@@ -2,19 +2,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define n 2000
-#define NUM_THREADS	n
 
-int mult[n][n];
+
+
+int **fst,**sec,**mult;
 
 struct args
 {
-    int* fst;
-    int* sec;
     int i;
+    int n;
 };
 
-void genMatrix(int mat[n][n])
+double ** allocate_matrix( int size )
+{
+  /* Allocate 'size' * 'size' doubles contiguously. */
+  double * vals = (double *) malloc( size * size * sizeof(double) );
+
+  /* Allocate array of double* with size 'size' */
+  double ** ptrs = (double **) malloc( size * sizeof(double*) );
+
+  int i;
+  for (i = 0; i < size; ++i) {
+    ptrs[ i ] = &vals[ i * size ];
+  }
+
+  return ptrs;
+}
+
+void genMatrix(int **mat, int n)
 {
   for(int i = 0; i < n; i++)
   {
@@ -23,42 +38,42 @@ void genMatrix(int mat[n][n])
   }
 }
 
-void printMat(int mat[n][n])
+void printMat(int **mat, int n)
 {
     printf(" The result of matrix multiplication or product of the matrices is: \n "); 
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++)
-        printf("%d \t", mat[i][j] );
+        printf("%d \t", mat[i][j]);
       printf(" \n ");
     }
 }
 
 void *valueCell(void *arguments)
 {
-  //printf("hola");
-  //printf("%d \n",((struct args*)arguments)->fst[24]);
   int i = ((struct args*)arguments)->i;
-  int* fst = ((struct args*)arguments)->fst;
-  int* sec = ((struct args*)arguments)->sec;
+  int n = ((struct args*)arguments)->n;
   for(int j = 0; j < n; j++)
   {
     int r = 0;
     for(int k = 0; k < n; k++)
-      r += fst[i*n+k] * sec[k*n+j];
+      r += fst[i][k] * sec[k][j];
     mult[i][j] = r;
-    //printf('%d \n',mult[i][j]);
   }
    pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[])
 {
-  int *fst = (int *)malloc(n * n * sizeof(int));
-  genMatrix(fst);
+  int n;
+  sscanf (argv[1],"%d",&n);
+  long int NUM_THREADS = n;
   
-  int *sec = (int *)malloc(n * n * sizeof(int));
-  genMatrix(sec);
+  fst = allocate_matrix(n);
+  sec = allocate_matrix(n);
+  mult = allocate_matrix(n);
 
+  genMatrix(fst,n);
+  genMatrix(sec,n);
 
    pthread_t threads[NUM_THREADS];
    int rc;
@@ -67,19 +82,16 @@ int main(int argc, char *argv[])
   start = clock();
    for(int i = 0; i < n; i++)
    {
-      struct args *arguments = (struct args *)malloc(sizeof(struct args));;
-      arguments->fst = fst;
-      arguments->sec = sec;
+      struct args *arguments = (struct args *)malloc(sizeof(struct args));
       arguments->i = i;
+      arguments->n = n;
       pthread_create(&threads[t], NULL, valueCell,(void * )arguments);
       t++;
    }
    end = clock();
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("N value = %d \n\n",n);
-    printf("Time used: %f \n",cpu_time_used);
-    /*printMat(fst);
-    printMat(sec);
-    printMat(mult);*/
+    printf("%f,",cpu_time_used);
+    if(n == 2000) printf("\n");
    pthread_exit(NULL);
+   return 0;
 }

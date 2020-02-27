@@ -2,9 +2,25 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define n 2000
+int **fst,**sec,**mult;
 
-void genMatrix(int mat[n][n])
+double ** allocate_matrix( int size )
+{
+  /* Allocate 'size' * 'size' doubles contiguously. */
+  double * vals = (double *) malloc( size * size * sizeof(double) );
+
+  /* Allocate array of double* with size 'size' */
+  double ** ptrs = (double **) malloc( size * sizeof(double*) );
+
+  int i;
+  for (i = 0; i < size; ++i) {
+    ptrs[ i ] = &vals[ i * size ];
+  }
+
+  return ptrs;
+}
+
+void genMatrix(int **mat, int n)
 {
   for(int i = 0; i < n; i++)
   {
@@ -13,17 +29,17 @@ void genMatrix(int mat[n][n])
   }
 }
 
-void printMat(int mul[n][n])
+void printMat(int **mat, int n)
 {
     printf(" The result of matrix multiplication or product of the matrices is: \n "); 
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++)
-        printf("%d \t", mul[i][j] );
+        printf("%d \t", mat[i][j]);
       printf(" \n ");
     }
 }
 
-void multmat(int fst[n][n],int sec[n][n],int mul[n][n])
+void multmat(int n)
 {
     int tot;
     for (int i = 0; i < n; i++) {
@@ -31,7 +47,7 @@ void multmat(int fst[n][n],int sec[n][n],int mul[n][n])
         for (int k = 0; k < n; k++) {
           tot = tot + fst[i][k] * sec[k][j];
         }
-        mul[i][j] = tot;
+        mult[i][j] = tot;
         tot = 0;
       }
     }
@@ -39,22 +55,24 @@ void multmat(int fst[n][n],int sec[n][n],int mul[n][n])
 
 int main(int argc, char const *argv[])
 {
-    int *fst = (int *)malloc(n * n * sizeof(int));
-    genMatrix(fst);
+    int n;
+    sscanf (argv[1],"%d",&n);
     
-    int *sec = (int *)malloc(n * n * sizeof(int));
-    genMatrix(sec);
+    fst = allocate_matrix(n);
+    sec = allocate_matrix(n);
+    mult = allocate_matrix(n);
 
-    int *mult = (int *)malloc(n * n * sizeof(int));
+    genMatrix(fst,n);
+    genMatrix(sec,n);
+  
+
+    
     clock_t start,end;
     start = clock();
-    multmat(fst,sec,mult);
+    multmat(n);
     end = clock();
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("N value = %d \n\n",n);
-    printf("Time used: %f \n",cpu_time_used);
-    /*printMat(fst);
-    printMat(sec);
-    printMat(mult);*/
+    printf("%f,",cpu_time_used);
+    if(n == 2000) printf("\n");
     return 0;
 }
