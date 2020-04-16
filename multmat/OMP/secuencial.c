@@ -55,24 +55,32 @@ void multmat(int n)
 
 int main(int argc, char const *argv[])
 {
-    int n;
-    sscanf (argv[1],"%d",&n);
-    
-    fst = allocate_matrix(n);
-    sec = allocate_matrix(n);
-    mult = allocate_matrix(n);
+  int n;
+  sscanf (argv[1],"%d",&n);
 
-    genMatrix(fst,n);
-    genMatrix(sec,n);
+  fst = allocate_matrix(n);
+  sec = allocate_matrix(n);
+  mult = allocate_matrix(n);
+
+  genMatrix(fst,n);
+  genMatrix(sec,n);
+
   
 
-    
-    clock_t start,end;
-    start = clock();
-    multmat(n);
-    end = clock();
-    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("%f,",cpu_time_used);
-    if(n == 2000) printf("\n");
-    return 0;
-}
+  clock_t start,end;
+  start = clock();
+  multmat(n);
+  end = clock();
+
+  /*printMat(fst,n);
+    printMat(sec,n);
+    printMat(mult,n);*/
+
+
+
+
+  double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  printf("%f,",cpu_time_used);
+  if(n == 2000) printf("\n");
+  return 0;
+  }
