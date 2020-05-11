@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "timing.h"
+#include "time.h"
 
 /* --
  * Do nsweeps sweeps of Jacobi iteration on a 1D Poisson problem
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     double* u;
     double* f;
     double h;
-    timing_t tstart, tend;
+    clock_t tstart, tend;
     char* fname;
 
     /* Process arguments */
@@ -74,15 +74,17 @@ int main(int argc, char** argv)
         f[i] = i * h;
 
     /* Run the solver */
-    get_time(&tstart);
+    tstart = clock();
     jacobi(nsteps, n, u, f);
-    get_time(&tend);
+    tend = clock();
+
+    double cpu_time_used = ((double) (tend - tstart)) / CLOCKS_PER_SEC;
 
     /* Run the solver */    
     printf("n: %d\n"
            "nsteps: %d\n"
            "Elapsed time: %g s\n", 
-           n, nsteps, timespec_diff(tstart, tend));
+           n, nsteps, cpu_time_used);
 
     /* Write the results */
     if (fname)
