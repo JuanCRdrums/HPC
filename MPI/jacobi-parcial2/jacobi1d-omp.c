@@ -32,20 +32,20 @@ void jacobi(int nsweeps, int n, double* u, double* f)
     utmp[0] = u[0];
     utmp[n] = u[n];
 
+    #pragma omp parallel for schedule(dynamic,1)
     for (sweep = 0; sweep < nsweeps; sweep += 2) {
         
         /* Old data in u; new data in utmp */
-        #pragma omp parallel for schedule(dynamic,1)
         for (i = 1; i < n; ++i)
             utmp[i] = (u[i-1] + u[i+1] + h2*f[i])/2;
-        #pragma omp barrier
+
 
         /* Old data in utmp; new data in u */
-        #pragma omp parallel for schedule(dynamic,1)
         for (i = 1; i < n; ++i)
             u[i] = (utmp[i-1] + utmp[i+1] + h2*f[i])/2;
-        #pragma omp barrier
+
     }
+    #pragma omp barrier
 
     free(utmp);
 }
