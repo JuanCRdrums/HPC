@@ -11,6 +11,12 @@ void write_vector(double *u,int offset,int n)
     printf("\n");
 }
 
+void process(int offset, int n,double* u, double* utmp,double* f,double h2)
+{
+    for(int i = offset; i < offset + n; i++)
+        u[i] = (utmp[i-1] + utmp[i+1] + h2*f[i])/2;
+}
+
 
 /* --
  * Do nsweeps sweeps of Jacobi iteration on a 1D Poisson problem
@@ -32,20 +38,38 @@ void jacobi(int nsweeps, int n, double* u, double* f)
     utmp[0] = u[0];
     utmp[n] = u[n];
 
-    #pragma omp parallel for schedule(dynamic,1)
+    int averow = (n-1) / 4;
+    int extra = (n-1) % 4;
+    int offset = 1;
+    int rows;
+    int offsets[4],rowsvector[4];
+    for(int i = 0; i < 4; i++)
+    {
+        int rows = (i < extra) ? averow + 1 : averow;
+        offsets[i] = offset;
+        offset = offset + rows;
+        rowsvector[i] = rows;
+    }
+
     for (sweep = 0; sweep < nsweeps; sweep += 2) {
         
         /* Old data in u; new data in utmp */
-        for (i = 1; i < n; ++i)
-            utmp[i] = (u[i-1] + u[i+1] + h2*f[i])/2;
-
+        #pragma omp parallel for schedule(dynamic,1)
+        for (i = 0; i < 4; i++)
+        {
+            process(offsets[i],rowsvector[i],utmp,u,f,h2);
+        }
+        #pragma omp barrier
 
         /* Old data in utmp; new data in u */
-        for (i = 1; i < n; ++i)
-            u[i] = (utmp[i-1] + utmp[i+1] + h2*f[i])/2;
+        #pragma omp parallel for schedule(dynamic,1)
+        for (i = 0; i < 4; i++)
+        {
+            process(offsets[i],rowsvector[i],u,utmp,f,h2);
+        }
+        #pragma omp barrier
 
     }
-    #pragma omp barrier
 
     free(utmp);
 }
